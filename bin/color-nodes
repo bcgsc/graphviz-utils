@@ -1,0 +1,22 @@
+#!/bin/bash
+set -eu -o pipefail
+
+if [ $# -lt 2 ]; then
+   echo "Usage: $(basename) <color> <node_id> [node_id]..." >&2
+   exit 1
+fi
+
+gvpr -a "$*" -c '
+BEGIN {
+	string match_color = ARGV[0];
+	int i;
+}
+N {
+	for (i = 1; i < ARGC; ++i) {
+		if (name == ARGV[i]) {
+			color = match_color;
+			style = "filled";
+		}
+	}
+}
+'

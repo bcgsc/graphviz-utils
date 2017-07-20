@@ -1,0 +1,9 @@
+#!/bin/bash
+set -eu -o pipefail
+
+gvpr '
+BEGIN { graph_t g = graph ("merge", "ND"); }
+N { clone(g,$); }
+E { clone(g,$); }
+END { write(g); }
+' "$@"
