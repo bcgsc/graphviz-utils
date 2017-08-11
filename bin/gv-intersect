@@ -1,0 +1,70 @@
+#!/bin/bash
+set -eu -o pipefail
+
+# Usage: gv-intersection graph1.gv graph2.gv [graph3.gv]... > intersection.gv
+#
+# Generate the graph that for the node intersection of the
+# input graphs, including edges that connect those nodes.
+
+gvpr '
+BEGIN {
+	// output graph (intersection)
+	graph_t outputGraph = graph("intersection", "D");
+
+	// input graphs
+	int numGraphs = 0;
+	graph_t graphs[int];
+
+	// names of nodes present in all graphs (node intersection)
+	int commonNodes[string];
+
+	// names of nodes present in current graph
+	int nodes[string];
+
+	// temporary vars
+	int i = 0;
+	node_t n, n2;
+	edge_t e;
+	string nodeName;
+}
+END_G {
+	graphs[numGraphs] = cloneG($G, "");
+	numGraphs++;
+}
+END {
+
+	// build `commonNodes` (names of nodes present in all graphs)
+
+	for (i = 0; i < numGraphs; i++) {
+		if (i == 0) {
+			for (n = fstnode(graphs[i]); n != NULL; n = nxtnode(n))
+			   commonNodes[n.name] = 1;
+		} else {
+			for (n = fstnode(graphs[i]); n != NULL; n = nxtnode(n))
+				nodes[n.name] = 1;
+		  	for (commonNodes[nodeName]) {
+				if (!(nodeName in nodes))
+					unset(commonNodes, nodeName);
+			}
+		}
+	}
+
+	// for each graph, copy nodes/edges contained in `commonNodes`
+	// to the output graph
+
+	for (i = 0; i < numGraphs; i++) {
+		for (n = fstnode(graphs[i]); n != NULL; n = nxtnode(n)) {
+			if (n.name in commonNodes) {
+				copy(outputGraph, n);
+				for (e = fstout(n); e != NULL; e = nxtout(e)) {
+					n2 = opp(e, n);
+					if (n2.name in commonNodes)
+						copy(outputGraph, e);
+				}
+			}
+		}
+	}
+
+	write(outputGraph);
+}
+' "$@"
