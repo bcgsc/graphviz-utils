@@ -1,0 +1,7 @@
+digraph {
+		a [color=red];
+		b [color=green];
+		c [color=blue];
+		a -> b [size="small"];
+		b -> c [size="medium"];
+}
