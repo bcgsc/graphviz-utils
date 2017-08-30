@@ -1,0 +1,22 @@
+#!/bin/bash
+set -eu -o pipefail
+
+# Output a graph containing only the given nodes and
+# their induced edges
+
+if [ $# -lt 1 ]; then
+	echo "Usage: cat graph1.gv | $(basename $0) <node_id_1> [node_id_2]..." >&2
+	exit 1
+fi
+nodes="$@";
+shift $#;
+
+gvpr -i -a "$nodes" '
+BEGIN {
+	int i;
+	int nodes[string];
+	for (i = 0; i < ARGC; ++i)
+		nodes[ARGV[i]] = i;
+}
+N [name in nodes]
+'
