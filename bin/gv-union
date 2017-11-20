@@ -2,7 +2,7 @@
 set -eu -o pipefail
 
 gvpr '
-BEGIN { graph_t g = graph ("merge", "ND"); }
+BEGIN { graph_t g = graph ("merge", "SD"); }
 N { clone(g,$); }
 E { clone(g,$); }
 END { write(g); }
