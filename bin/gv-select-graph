@@ -1,0 +1,19 @@
+#!/bin/bash
+set -eu -o pipefail
+
+if [ $# -lt 1 ]; then
+	echo "Usage: $(basename $0) <graph_id> [multigraph.gv]..." >&2
+	echo "Output a single graph from a file containing multiple graphs." >&2
+	exit 1;
+fi
+graph_name=$1; shift
+
+gvpr -a $graph_name '
+BEGIN { string graph_name = ARGV[0]; }
+BEG_G {
+	if ($G.name == graph_name) {
+		write($G);
+		exit(0);
+	}
+}
+END { exit(1); }' "$@"
