@@ -1,0 +1,28 @@
+#!/bin/bash
+set -eu -o pipefail
+
+if [ $# -lt 2 ]; then
+cat <<EOF
+Usage: gv-add-edges base.gv graph2.gv [graph3.gv]... > result.gv
+
+Add edges from graph2.gv,graph3.gv,... to base.gv.  An edge
+will only be added if both nodes already exist in base.gv.
+The output graph will contain parallel edges if a given edge
+is contained in one or more input graphs.
+EOF
+exit 1
+fi
+
+gvpr '
+BEGIN {
+	graph_t outputGraph = graph("result", "D");
+	int graphIndex = 0;
+}
+N [graphIndex == 0] { copy(outputGraph, $)}
+E [graphIndex == 0] { copy(outputGraph, $) }
+E [graphIndex > 0 && isNode(outputGraph, $.head.name) && isNode(outputGraph, $.tail.name) ] {
+	copy(outputGraph, $);
+}
+END_G { graphIndex++; }
+END { write(outputGraph); }
+' "$@"
